@@ -20,8 +20,13 @@ JNICALL Java_org_suirui_util_libyuv_jni_libYuvJNI_nv21To420(JNIEnv *env, jclass 
 JNIEXPORT jobject
 JNICALL Java_org_suirui_util_libyuv_jni_libYuvJNI_yuv420ToYUV(JNIEnv *env, jclass obj, jbyteArray srcData, jint width, jint height);
 
+//NV21转I420并旋转
+JNIEXPORT jbyteArray
+JNICALL Java_org_suirui_util_libyuv_jni_libYuvJNI_NV21ToI420Rotate(JNIEnv *env, jclass obj, jbyteArray srcData,jint w, jint h,jint rotate);
 
-
+//NV21转I420并旋转+镜像
+    JNIEXPORT jbyteArray
+    JNICALL Java_org_suirui_util_libyuv_jni_libYuvJNI_NV21ToI420RotateMirror(JNIEnv *env, jclass obj, jbyteArray srcData,jint w, jint h,jint rotate);
 #ifdef __cplusplus
 }
 #endif

@@ -285,7 +285,134 @@ JNICALL Java_org_suirui_util_libyuv_jni_libYuvJNI_yuv420ToYUV(JNIEnv *env, jclas
     return yuv_obj ;
 
 }
+/******************************************/
+static unsigned char *Dst_data;
+
+//NV21转I420并旋转
+JNIEXPORT jbyteArray
+JNICALL Java_org_suirui_util_libyuv_jni_libYuvJNI_NV21ToI420Rotate(JNIEnv *env, jclass obj, jbyteArray srcData,jint src_width, jint src_height,jint rotate){
+  if(Dst_data){
+            free(Dst_data);
+                     Dst_data=NULL;
+         }
+    unsigned char *Src_data = byteArrayToChar(env, srcData);
 
 
+
+	// NV12 video size
+	int NV12_Size = src_width * src_height * 3 / 2;
+	int NV12_Y_Size = src_width * src_height;
+
+	// YUV420 video size
+	int I420_Size = src_width * src_height * 3 / 2;
+	int I420_Y_Size = src_width * src_height;
+	int I420_U_Size = (src_width >> 1)*(src_height >> 1);
+	int I420_V_Size = I420_U_Size;
+
+
+      	Dst_data = (unsigned char *) malloc(
+                    (I420_Size) * sizeof(unsigned char));  //I420
+
+    unsigned char * Y_data_Src = Src_data;
+  	unsigned char * UV_data_Src = Src_data + NV12_Y_Size;
+  	int src_stride_y = src_width;
+  	int src_stride_uv = src_width;
+
+  		//dst: buffer address of Y channel U channel and V channel
+  	unsigned char * Y_data_Dst = Dst_data;
+  	unsigned char * U_data_Dst = Dst_data + I420_Y_Size;
+  	unsigned char * V_data_Dst = Dst_data + I420_Y_Size + I420_U_Size;
+  	int Dst_Stride_Y;
+  	int Dst_Stride_U;
+  	int Dst_Stride_V;
+
+
+  		if (rotate == 90 || rotate == 270)
+  		{
+  			Dst_Stride_Y = src_height;
+  			Dst_Stride_U = src_height >> 1;
+  			Dst_Stride_V = Dst_Stride_U;
+  		}
+  		else
+  		{
+  			Dst_Stride_Y = src_width;
+  			Dst_Stride_U = src_width >> 1;
+  			Dst_Stride_V = Dst_Stride_U;
+  		}
+  		int ret = libyuv::NV12ToI420Rotate(Y_data_Src, src_stride_y,
+  										   UV_data_Src, src_stride_uv,
+  										   Y_data_Dst, Dst_Stride_Y,
+  										   U_data_Dst, Dst_Stride_U,
+  										   V_data_Dst, Dst_Stride_V,
+  										   src_width, src_height,
+  										     (libyuv::RotationMode) rotate);
+
+  		return getByteToArray(env,Dst_data,I420_Size);
+
+}
+//NV21转I420并旋转+镜像
+    JNIEXPORT jbyteArray
+    JNICALL Java_org_suirui_util_libyuv_jni_libYuvJNI_NV21ToI420RotateMirror(JNIEnv *env, jclass obj, jbyteArray srcData,jint src_width, jint src_height,jint rotate){
+    if(Dst_data){
+                free(Dst_data);
+                         Dst_data=NULL;
+             }
+        unsigned char *Src_data = byteArrayToChar(env, srcData);
+
+
+
+    	// NV12 video size
+    	int NV12_Size = src_width * src_height * 3 / 2;
+    	int NV12_Y_Size = src_width * src_height;
+
+    	// YUV420 video size
+    	int I420_Size = src_width * src_height * 3 / 2;
+    	int I420_Y_Size = src_width * src_height;
+    	int I420_U_Size = (src_width >> 1)*(src_height >> 1);
+    	int I420_V_Size = I420_U_Size;
+
+
+          	Dst_data = (unsigned char *) malloc(
+                        (I420_Size) * sizeof(unsigned char));  //I420
+
+        unsigned char * Y_data_Src = Src_data;
+      	unsigned char * UV_data_Src = Src_data + NV12_Y_Size;
+      	int src_stride_y = src_width;
+      	int src_stride_uv = src_width;
+
+      		//dst: buffer address of Y channel U channel and V channel
+      	unsigned char * Y_data_Dst = Dst_data;
+      	unsigned char * U_data_Dst = Dst_data + I420_Y_Size;
+      	unsigned char * V_data_Dst = Dst_data + I420_Y_Size + I420_U_Size;
+      	int Dst_Stride_Y;
+      	int Dst_Stride_U;
+      	int Dst_Stride_V;
+
+
+      		if (rotate == 90 || rotate == 270)
+      		{
+      			Dst_Stride_Y = src_height;
+      			Dst_Stride_U = src_height >> 1;
+      			Dst_Stride_V = Dst_Stride_U;
+      		}
+      		else
+      		{
+      			Dst_Stride_Y = src_width;
+      			Dst_Stride_U = src_width >> 1;
+      			Dst_Stride_V = Dst_Stride_U;
+      		}
+
+
+
+      int ret = NV12ToI420RotateMirror(Y_data_Src, src_stride_y,
+      										 UV_data_Src, src_stride_uv,
+      										 Y_data_Dst, Dst_Stride_Y,
+      										 U_data_Dst, Dst_Stride_U,
+      										 V_data_Dst, Dst_Stride_V,
+      										 src_width, src_height,
+      										 (libyuv::RotationMode) rotate);
+
+      		return getByteToArray(env,Dst_data,I420_Size);
+    }
 
 }

@@ -25,7 +25,7 @@ public class libYuvJNI {
     }
 
     private void loadlibrary() {
-        Log.e("","signal....loadlibrary");
+        Log.e("", "signal....loadlibrary");
         String[] LIBS = new String[]{"yuv", "yuvUtil"};
         for (int i = 0; i < LIBS.length; i++) {
             try {
@@ -38,8 +38,6 @@ public class libYuvJNI {
     }
 
 
-
-
     /**
      * @param buf
      * @param w
@@ -47,14 +45,22 @@ public class libYuvJNI {
      * @param rotate 旋转度数
      * @return
      */
-    public static native byte[] nv21To420(byte[] buf, int w, int h, int rotate,boolean isMirror,boolean isRotate);
+    public static native byte[] nv21To420(byte[] buf, int w, int h, int rotate, boolean isMirror, boolean isRotate);
 
     /**
-     *yuv转yuv分量
+     * yuv转yuv分量
+     *
      * @param buf
      * @param w
      * @param h
      * @return
      */
     public static native YUV yuv420ToYUV(byte[] buf, int w, int h);
+
+
+    //NV21转I420并旋转
+    public static native byte[] NV21ToI420Rotate(byte[] buf, int w, int h, int rotate);
+
+    //NV21转I420并旋转+镜像
+    public static native byte[] NV21ToI420RotateMirror(byte[] buf, int w, int h, int rotate);
 }

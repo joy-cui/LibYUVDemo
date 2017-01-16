@@ -111,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     public void onPreviewFrame(byte[] data, Camera camera) {
         ImageUtils.saveImageData(data, true);
         //旋转270度
-        byte[] outputData = CodeUtil.getInstance().nv21To420(data, SRC_FRAME_WIDTH, SRC_FRAME_HEIGHT, 270, false, true);
+//        byte[] outputData = CodeUtil.getInstance().nv21To420(data, SRC_FRAME_WIDTH, SRC_FRAME_HEIGHT, 270, false, true);
+        byte[] outputData = CodeUtil.getInstance().NV21ToI420Rotate(data,SRC_FRAME_WIDTH, SRC_FRAME_HEIGHT, 270);
         ImageUtils.saveImageData(outputData, false);
 
     }

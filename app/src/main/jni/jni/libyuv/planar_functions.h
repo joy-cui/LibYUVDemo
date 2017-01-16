@@ -95,6 +95,15 @@ int I420ToI400(const uint8* src_y, int src_stride_y,
 // Alias
 #define I420ToI420Mirror I420Mirror
 
+// NV12 to I420 mirror
+LIBYUV_API
+int NV12ToI420Mirro(const uint8* src_y, int src_stride_y,
+					const uint8* src_uv, int src_stride_uv,
+					uint8* dst_y, int dst_stride_y,
+					uint8* dst_u, int dst_stride_u,
+					uint8* dst_v, int dst_stride_v,
+					int width, int height);
+
 // I420 mirror.
 LIBYUV_API
 int I420Mirror(const uint8* src_y, int src_stride_y,

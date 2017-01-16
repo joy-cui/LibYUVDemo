@@ -42,5 +42,13 @@ public class CodeUtil {
         return libYuvJNI.yuv420ToYUV(buf, w, h);
     }
 
+    //NV21转I420并旋转
+    public byte[] NV21ToI420Rotate(byte[] buf, int w, int h, int rotate) {
+        return libYuvJNI.NV21ToI420Rotate(buf, w, h, rotate);
+    }
 
+    //NV21转I420并旋转+镜像
+    public byte[] NV21ToI420RotateMirror(byte[] buf, int w, int h, int rotate) {
+        return libYuvJNI.NV21ToI420RotateMirror(buf, w, h, rotate);
+    }
 }
