@@ -227,6 +227,53 @@ int I420ToI400(const uint8* src_y, int src_stride_y,
   return 0;
 }
 
+// Mirror uv plane of data
+void MirrorUVPlane(const uint8* src_uv, int src_stride_uv,
+				   uint8* dst_u, int dst_stride_u,
+				   uint8* dst_v, int dst_stride_v,
+				   int width ,int height)
+{
+	int y;
+	void(*MirrorRowUV)(const uint8* src_uv, uint8* dst_u, uint8* dst_v, int width) = MirrorUVRow_C;
+
+	// Negative height means invert the image.
+	if (height < 0) {
+		height = -height;
+		src_uv = src_uv + (height - 1) * src_stride_uv;
+		src_stride_uv = -src_stride_uv;
+	}
+
+#if defined(HAS_MIRRORUVROW_NEON)
+	if (TestCpuFlag(kCpuHasNEON) && IS_ALIGNED(width, 8))
+	{
+		MirrorRowUV = MirrorUVRow_NEON;
+	}
+#endif
+
+#if defined(HAS_MIRRORROW_UV_SSSE3)
+	if (TestCpuFlag(kCpuHasSSSE3) && IS_ALIGNED(width, 16)) 
+	{
+		MirrorRowUV = MirrorUVRow_SSSE3;
+	}
+#endif
+
+#if defined(HAS_MIRRORUVROW_MIPS_DSPR2)
+	if (TestCpuFlag(kCpuHasMIPS_DSPR2) &&
+		IS_ALIGNED(src, 4) && IS_ALIGNED(src_stride, 4)) {
+		MirrorRowUV = MirrorUVRow_MIPS_DSPR2;
+	}
+#endif
+
+	// Mirror uv plane
+	for (int y = 0; y < height; ++y) 
+	{
+		MirrorRowUV(src_uv, dst_u, dst_v, width);
+		src_uv += src_stride_uv;
+		dst_u += dst_stride_u;
+		dst_v += dst_stride_v;
+	}
+}
+
 // Mirror a plane of data.
 void MirrorPlane(const uint8* src_y, int src_stride_y,
                  uint8* dst_y, int dst_stride_y,
@@ -450,6 +497,45 @@ int I400Mirror(const uint8* src_y, int src_stride_y,
 
   MirrorPlane(src_y, src_stride_y, dst_y, dst_stride_y, width, height);
   return 0;
+}
+// Mirro NV12 to I420 video format with optional flipping
+LIBYUV_API
+int NV12ToI420Mirro(const uint8* src_y, int src_stride_y,
+					const uint8* src_uv, int src_stride_uv,
+					uint8* dst_y, int dst_stride_y,
+					uint8* dst_u, int dst_stride_u,
+					uint8* dst_v, int dst_stride_v,
+					int width, int height){
+
+	int halfwidth = (width + 1) >> 1;
+	int halfheight = (height + 1) >> 1;
+	if (!src_y || !src_uv || width <= 0 || height == 0 ||
+		!dst_y || !dst_u || !dst_v) {
+		return -1;
+	}
+
+	// Negative height means invert the image.
+	if (height < 0) {
+		height = -height;
+		halfheight = (height + 1) >> 1;
+		src_y = src_y + (height - 1) * src_stride_y;
+		src_uv = src_uv + (halfheight - 1) * src_stride_uv;
+		src_stride_y = -src_stride_y;
+		src_stride_uv = -src_stride_uv;
+	}
+
+	if (src_y && dst_y) {
+		MirrorPlane(src_y, src_stride_y, dst_y, dst_stride_y, width, height);
+	}
+	if (src_uv && dst_u && dst_v)
+	{
+		MirrorUVPlane(src_uv, src_stride_uv,
+					  dst_u, dst_stride_u,
+					  dst_v, dst_stride_v,
+					  halfwidth, halfheight);
+	}
+
+	return 0;
 }
 
 // Mirror I420 with optional flipping
